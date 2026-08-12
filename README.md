@@ -14,6 +14,18 @@ zero to a working, invokable contract before adding anything else.
 
 Source, WIT interface, and the registration script are in this repo.
 
+## Use case
+
+Any agent that needs to reason about price before acting (a payments agent
+deciding whether a quote is fair, a treasury agent rebalancing, a trading
+agent sizing a position) needs a price feed it can trust came from a real
+source and wasn't tampered with in transit. Running the fetch inside a TEE
+contract means the agent gets back a value it can attest was actually
+fetched from CoinGecko at `fetched_at_secs`, not injected by a compromised
+host process — the same pattern generalizes to any external read (FX rates,
+oracle feeds, inventory counts) an agent needs to trust without running its
+own infrastructure.
+
 ## Identity + credits
 
 Claimed a dev key and test credits from the [claim page](https://www.terminal3.io/claim-page),
