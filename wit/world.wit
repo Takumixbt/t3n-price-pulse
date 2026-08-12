@@ -1,0 +1,39 @@
+/// price-pulse WIT world — minimal public-HTTP TEE contract.
+///
+/// Imports required host capabilities:
+///   - tenant-context: tenant DID + cluster-consistent timestamp (base)
+///   - logging:        debug / info / error lines (base)
+///   - kv-store:       base capability; imported but unused by this contract —
+///                     price-pulse never reads or writes tenant state
+///   - http:           outbound call to a public price API. No auth header,
+///                     no secret, no PII: this is the smallest possible
+///                     capability upgrade from `tenant-base` to `tenant-http`.
+///
+/// Contrast with the companion `tenant-notebook` contract, which imports
+/// kv-store for real (get/put) and never imports `http` at all — the two
+/// contracts deliberately exercise disjoint capability surfaces.
+package z:price-pulse@0.1.0;
+
+world price-pulse {
+    import host:tenant/tenant-context@1.0.0;
+    import host:interfaces/logging@2.1.0;
+    import host:interfaces/kv-store@2.1.0;
+    import host:interfaces/http@2.1.0;
+
+    export contracts;
+}
+
+interface contracts {
+    /// Standard 3-field envelope used by all contracts callable from the node.
+    record generic-input {
+        input:        option<list<u8>>,
+        user-profile: option<list<u8>>,
+        context:      option<list<u8>>,
+    }
+
+    /// Fetch a spot price from a public price API and stamp it with T3N's
+    /// cluster-consistent timestamp.
+    /// Input  (JSON): { coin_id: string, vs_currency: string }
+    /// Output (JSON): { coin_id, vs_currency, price: f64, fetched_at_secs: u64 }
+    get-price: func(req: generic-input) -> result<list<u8>, string>;
+}

@@ -1,0 +1,10 @@
+# Deliberately NOT setting [build] target = "wasm32-wasip2" here (as the
+# z-tenant-flight reference repo's .cargo/config.toml does): that forces
+# wasm32-wasip2 as the default for every cargo invocation, including
+# `cargo test`, which then tries to execute the compiled .wasm as a native
+# binary and fails ("not a valid Win32 application" / os error 193 on
+# Windows; an analogous exec-format error on Unix without a wasm runner
+# configured). Native unit tests need the host target; only the release
+# artifact needs wasm32-wasip2 — pass --target explicitly on that command:
+#   cargo build --target wasm32-wasip2 --release
+#   cargo test                          # host target, no flag needed

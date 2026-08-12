@@ -1,0 +1,9 @@
+{
+  "name": "price-pulse-scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@terminal3/t3n-sdk": "latest",
+    "tsx": "latest"
+  }
+}

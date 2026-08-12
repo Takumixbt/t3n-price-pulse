@@ -1,0 +1,28 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "price-pulse agent",
+  "description": "Reads a public spot price via a T3N TEE contract (Superteam/LOL Ventures ADK bounty entry)",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://agent.example/.well-known/agent-card.json",
+      "version": "0.3.0"
+    },
+    {
+      "name": "MCP",
+      "endpoint": "https://mcp.agent.example/",
+      "version": "2025-06-18"
+    },
+    {
+      "name": "DID",
+      "endpoint": "did:t3n:51cfebef5279596508dae8355cb2c86a3ae08efc",
+      "version": "v1"
+    }
+  ],
+  "x402Support": false,
+  "active": true,
+  "registrations": [],
+  "supportedTrust": [
+    "tee-attestation"
+  ]
+}
