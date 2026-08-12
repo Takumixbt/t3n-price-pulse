@@ -1,6 +1,6 @@
 [package]
 name = "price-pulse"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "T3N TEE contract: public spot-price lookup via host:interfaces/http. No secrets, no PII, no kv-store writes — deliberately the smallest capability surface (tenant-context + logging + http)."
 license = "MIT"

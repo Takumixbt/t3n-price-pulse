@@ -36,4 +36,11 @@ interface contracts {
     /// Input  (JSON): { coin_id: string, vs_currency: string }
     /// Output (JSON): { coin_id, vs_currency, price: f64, fetched_at_secs: u64 }
     get-price: func(req: generic-input) -> result<list<u8>, string>;
+
+    /// Fetch spot prices for a watchlist of coins in a single outbound call —
+    /// what a trading/treasury agent would actually poll on a timer, rather
+    /// than one coin in isolation.
+    /// Input  (JSON): { coin_ids: list<string>, vs_currency: string }
+    /// Output (JSON): { vs_currency, prices: [{ coin_id, price: f64 }], fetched_at_secs: u64 }
+    get-prices: func(req: generic-input) -> result<list<u8>, string>;
 }

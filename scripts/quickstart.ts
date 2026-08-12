@@ -57,7 +57,7 @@ console.log("TenantClient ready:", me);
 // --- Step: register the compiled contract ---
 const WASM_PATH = "../target/wasm32-wasip2/release/price_pulse.wasm";
 const CONTRACT_TAIL = "price-pulse";
-const CONTRACT_VERSION = "0.1.1";
+const CONTRACT_VERSION = "0.1.2";
 
 const wasmBytes = await readFile(WASM_PATH);
 const registered = await tenant.contracts.register({
@@ -89,7 +89,7 @@ await t3n.execute({
           {
             scriptName,
             versionReq: scriptVersion,
-            functions: ["get-price"],
+            functions: ["get-price", "get-prices"],
             allowedHosts: ["api.coingecko.com"],
           },
         ],
@@ -106,3 +106,11 @@ const priceResp = await t3n.executeAndDecode({
   input: { coin_id: "solana", vs_currency: "usd" },
 });
 console.log("get-price result:", priceResp);
+
+const pricesResp = await t3n.executeAndDecode({
+  script_name: scriptName,
+  script_version: scriptVersion,
+  function_name: "get-prices",
+  input: { coin_ids: ["solana", "bitcoin", "ethereum"], vs_currency: "usd" },
+});
+console.log("get-prices result:", pricesResp);

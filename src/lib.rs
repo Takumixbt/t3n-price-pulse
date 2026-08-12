@@ -3,7 +3,7 @@
 
 extern crate alloc;
 
-pub const CONTRACT_VERSION: &str = "0.1.1";
+pub const CONTRACT_VERSION: &str = "0.1.2";
 
 wit_bindgen::generate!({
     world: "price-pulse",
@@ -26,6 +26,13 @@ impl exports::z::price_pulse::contracts::Guest for Component {
     ) -> Result<alloc::vec::Vec<u8>, alloc::string::String> {
         let input = req.input.ok_or("get-price: missing input")?;
         price::get_price(&input)
+    }
+
+    fn get_prices(
+        req: exports::z::price_pulse::contracts::GenericInput,
+    ) -> Result<alloc::vec::Vec<u8>, alloc::string::String> {
+        let input = req.input.ok_or("get-prices: missing input")?;
+        price::get_prices(&input)
     }
 }
 

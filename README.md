@@ -4,13 +4,15 @@ Agent ID, test credits, and a deployed Rust contract on Terminal3's T3N testnet.
 
 ## What I built
 
-`price-pulse` is a minimal TEE contract: one exported function, `get-price`,
-that calls CoinGecko's public price endpoint from inside the enclave and
-returns a spot price stamped with T3N's own cluster timestamp. No secrets,
-no PII, no KV writes — it imports only `tenant-context`, `logging`, and
-`http`, which keeps it linked against the smallest capability world the ADK
-offers (`tenant-http`). The idea was to test the thinnest possible path from
-zero to a working, invokable contract before adding anything else.
+`price-pulse` is a TEE contract with two exported functions. `get-price`
+calls CoinGecko's public price endpoint from inside the enclave and returns
+a spot price stamped with T3N's own cluster timestamp; `get-prices` does the
+same for a whole watchlist in one outbound call. No secrets, no PII, no KV
+writes — it imports only `tenant-context`, `logging`, and `http`, which
+keeps it linked against the smallest capability world the ADK offers
+(`tenant-http`). The idea was to test the thinnest possible path from zero
+to a working, invokable contract, then extend it with a second function
+once that path was proven.
 
 Source, WIT interface, and the registration script are in this repo.
 
@@ -25,6 +27,13 @@ fetched from CoinGecko at `fetched_at_secs`, not injected by a compromised
 host process — the same pattern generalizes to any external read (FX rates,
 oracle feeds, inventory counts) an agent needs to trust without running its
 own infrastructure.
+
+`get-prices` pushes this toward something an agent would actually run on a
+timer: a treasury or trading agent doesn't watch one asset, it watches a
+book. Fetching the whole watchlist in a single outbound call keeps the
+egress grant and the audit trail to one call per poll instead of one per
+asset — the difference between "a demo" and something you'd point a real
+agent loop at.
 
 ## Identity + credits
 
@@ -56,28 +65,40 @@ Publicly resolvable — `curl` that URL and you get the card back verbatim.
 
 ```
 $ cargo build --target wasm32-wasip2 --release
-$ cargo test          # 4 unit tests, native target
+$ cargo test          # 6 unit tests, native target
 ```
 
-Registered and invoked from the same session:
+Registered and invoked from the same session (this is the second deploy,
+`0.1.2` — the first, `get-price`-only version registered as contract id 630;
+adding `get-prices` and redeploying bumped it to 632):
 
 ```
-registered z:51cfebef5279596508dae8355cb2c86a3ae08efc:price-pulse as contract id 630
+registered z:51cfebef5279596508dae8355cb2c86a3ae08efc:price-pulse as contract id 632
 self-grant authorized: get-price -> api.coingecko.com
 get-price result: {
   coin_id: 'solana',
   vs_currency: 'usd',
-  price: 76.21,
-  fetched_at_secs: 1786542308
+  price: 75.36,
+  fetched_at_secs: 1786546996
+}
+get-prices result: {
+  vs_currency: 'usd',
+  prices: [
+    { coin_id: 'solana', price: 75.36 },
+    { coin_id: 'bitcoin', price: 63291 },
+    { coin_id: 'ethereum', price: 1883.98 }
+  ],
+  fetched_at_secs: 1786546997
 }
 ```
 
 That's a real outbound HTTP call executed inside the TEE, returning a live
-price. `wasm-tools component wit` on the compiled artifact confirms the
-capability surface matches the source exactly — `tenant-context`, `logging`,
-and `http` only. The `kv-store` import I left in `world.wit` for parity with
-the reference world never shows up in the compiled component's import table
-at all, since nothing in the code calls it — capability declaration is
+price — and a second real call fetching three assets in one round trip.
+`wasm-tools component wit` on the compiled artifact confirms the capability
+surface matches the source exactly — `tenant-context`, `logging`, and `http`
+only. The `kv-store` import I left in `world.wit` for parity with the
+reference world never shows up in the compiled component's import table at
+all, since nothing in the code calls it — capability declaration is
 genuinely tied to what you use, not what you import.
 
 ## Findings
